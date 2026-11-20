@@ -1,0 +1,194 @@
+/* ПринтУчёт: общие стили. Цвета и размеры взяты из макета Figma.
+   Шрифт Inter из макета подключается только если он установлен: внешняя сеть не используется (СИС-01). */
+:root {
+  --navy: #14264a;
+  --blue: #2457e6;
+  --blue-dark: #1c46c2;
+  --bg: #f4f4f5;
+  --surface: #ffffff;
+  --surface-soft: #f8f9fb;
+  --line: #e3e6f0;
+  --text: #1c2233;
+  --muted: #6b7280;
+  --danger: #b42318;
+  --danger-bg: #fdecea;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Шапка */
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 32px;
+  min-height: 72px;
+}
+.topbar__nav { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.topbar__nav a, .topbar__nav span {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.topbar__nav a:hover { border-bottom-color: rgba(255, 255, 255, .5); }
+.topbar__nav a.is-active { border-bottom-color: #fff; }
+.topbar__nav .is-soon { opacity: .5; cursor: default; }
+.topbar__user { display: flex; align-items: center; gap: 16px; font-size: 18px; font-weight: 500; }
+.topbar__user form { margin: 0; }
+.topbar__logout {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .5);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.topbar__logout:hover { background: rgba(255, 255, 255, .12); }
+
+.page { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 24px 32px 40px; }
+.footer { color: var(--muted); font-size: 12px; text-align: center; padding: 16px; }
+
+/* Поля */
+.field { margin-bottom: 18px; }
+.field__label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.field__hint { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.field__error { margin: 6px 0 0; color: var(--danger); font-size: 12px; }
+.input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  color: var(--text);
+}
+.input:focus, .btn:focus-visible, .topbar__logout:focus-visible, .topbar__nav a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* Кнопки */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover { background: var(--surface-soft); }
+.btn--primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn--primary:hover { background: var(--blue-dark); }
+.btn--block { width: 100%; height: 42px; }
+
+/* Сообщения */
+.alert { border-radius: 6px; padding: 10px 12px; margin-bottom: 18px; font-size: 13px; }
+.alert--error { background: var(--danger-bg); color: var(--danger); }
+.muted { color: var(--muted); }
+
+/* Вход */
+.auth-card {
+  width: min(440px, calc(100% - 32px));
+  margin: 72px auto 0;
+  background: var(--surface);
+  padding: 32px 28px 28px;
+  border-radius: var(--radius);
+}
+.auth-card__brand { margin: 0 0 28px; text-align: center; font-size: 18px; font-weight: 500; }
+
+/* Форма на карточке (смена пароля) */
+.form-card {
+  width: min(440px, 100%);
+  margin: 32px auto 0;
+  background: var(--surface);
+  padding: 28px;
+  border-radius: var(--radius);
+}
+.form-card__title { margin: 0 0 12px; font-size: 22px; font-weight: 500; }
+.form-actions { display: flex; gap: 10px; border-top: 1px solid var(--line); padding-top: 18px; margin-top: 8px; }
+
+/* Фильтры */
+.filters { margin-bottom: 16px; }
+.filters__grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.filters .field { margin-bottom: 0; }
+.filters__actions { display: flex; justify-content: space-between; margin-top: 12px; }
+
+/* Таблица */
+.table-wrap { background: var(--surface-soft); border-radius: var(--radius); overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; }
+.table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 12px 14px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table td { padding: 12px 14px; border-bottom: 1px solid var(--line); background: #fff; vertical-align: top; }
+.table tbody tr:hover td { background: var(--surface-soft); }
+.table .num { text-align: right; white-space: nowrap; }
+.table .strong { font-weight: 600; white-space: nowrap; }
+.table__empty td { text-align: center; padding: 72px 14px; color: var(--muted); font-size: 16px; font-weight: 600; background: var(--surface-soft); }
+.table__empty:hover td { background: var(--surface-soft); }
+
+/* Статусы */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #eceef3;
+  color: #3b4256;
+}
+.badge--layout_approval { background: #fff3d6; color: #8a5a00; }
+.badge--in_production { background: #e3ecff; color: #1c46c2; }
+.badge--ready { background: #dff5e7; color: #136a35; }
+.badge--issued { background: #e7e9ee; color: #4b5266; }
+.badge--cancelled { background: var(--danger-bg); color: var(--danger); }
+.badge--overdue { background: var(--danger-bg); color: var(--danger); margin-left: 6px; }
+
+.pager { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; }
+
+/* Узкие экраны (ПИ-07: от 360 px без горизонтальной прокрутки страницы) */
+@media (max-width: 980px) {
+  .filters__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .topbar { padding: 12px 16px; flex-wrap: wrap; }
+  .topbar__nav a, .topbar__nav span, .topbar__user { font-size: 16px; }
+  .page { padding: 16px; }
+  .filters__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

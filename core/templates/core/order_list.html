@@ -1,0 +1,61 @@
+{% extends "core/base.html" %}
+{% block title %}Заказы — ПринтУчёт{% endblock %}
+{% block content %}
+<form method="get" class="filters" novalidate>
+  <div class="filters__grid">
+    {% for field in form %}
+      <div class="field">
+        <label class="field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="filters__actions">
+    <button type="submit" class="btn btn--primary">Найти</button>
+    {% if can_create %}
+      <a href="#" class="btn btn--primary" title="Форма появится на следующем шаге">+ Новый заказ</a>
+    {% endif %}
+  </div>
+</form>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Номер</th><th>Клиент</th><th>Продукция</th><th>Статус</th>
+        <th>Срок готовности</th><th class="num">Стоимость</th><th>Исполнитель</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in page %}
+        <tr>
+          <td class="strong">{{ order.order_number }}</td>
+          <td>{{ order.client.name }}</td>
+          <td>{{ order.products|default:"—" }}</td>
+          <td><span class="badge badge--{{ order.status.code }}">{{ order.status.name }}</span></td>
+          <td>
+            {{ order.due_date|date:"d.m.Y" }}
+            {% if order.is_overdue %}<span class="badge badge--overdue">Просрочен</span>{% endif %}
+          </td>
+          <td class="num">{{ order.agreed_price|floatformat:2 }}</td>
+          <td>{{ order.executors|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr class="table__empty"><td colspan="7">Нет заказов</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page.paginator.num_pages > 1 %}
+  <nav class="pager" aria-label="Страницы">
+    {% if page.has_previous %}
+      <a class="btn" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page.previous_page_number }}">Назад</a>
+    {% endif %}
+    <span class="muted">Страница {{ page.number }} из {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}
+      <a class="btn" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page.next_page_number }}">Вперёд</a>
+    {% endif %}
+  </nav>
+{% endif %}
+{% endblock %}

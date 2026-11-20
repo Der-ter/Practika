@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block title %}Вход — ПринтУчёт{% endblock %}
+{% block content %}
+<main class="auth-card">
+  <h1 class="auth-card__brand">ПринтГрад</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if error %}<div class="alert alert--error" role="alert">{{ error }}</div>{% endif %}
+    <div class="field">
+      <label class="field__label" for="{{ form.login.id_for_label }}">Логин</label>
+      {{ form.login }}
+    </div>
+    <div class="field">
+      <label class="field__label" for="{{ form.password.id_for_label }}">Пароль</label>
+      {{ form.password }}
+    </div>
+    <button type="submit" class="btn btn--primary btn--block">Войти</button>
+  </form>
+</main>
+{% endblock %}
