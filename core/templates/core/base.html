@@ -22,6 +22,13 @@
   </header>
 {% endif %}
   <div class="page">
+    {% if messages %}
+      <div class="messages" role="status">
+        {% for message in messages %}
+          <div class="alert alert--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </div>
   <footer class="footer">ПринтУчёт · версия {{ app_version }}</footer>

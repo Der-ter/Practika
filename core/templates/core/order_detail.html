@@ -1,0 +1,227 @@
+{% extends "core/base.html" %}
+{% block title %}Заказ {{ order.order_number }} — ПринтУчёт{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Заказ {{ order.order_number }}</h1>
+    <p class="muted">Создан {{ order.created_at|date:"d.m.Y" }} · Автор: {{ order.manager.full_name }}</p>
+  </div>
+  <a href="{% url 'orders' %}" class="btn">К списку</a>
+</div>
+<p class="status-line">
+  Статус: <span class="badge badge--{{ order.status.code }}">{{ order.status.name }}</span>
+  {% if is_overdue %}<span class="badge badge--overdue">Просрочен</span>{% endif %}
+</p>
+
+<div class="layout">
+  <div class="stack">
+
+    <section class="card">
+      <h2 class="card__title">Заказ и клиент</h2>
+      <dl class="facts">
+        <div><dt>Клиент</dt><dd>{{ order.client.name }}</dd></div>
+        <div><dt>Срок готовности</dt><dd>{{ order.due_date|date:"d.m.Y" }}</dd></div>
+        <div><dt>Согласованная стоимость</dt><dd>{{ order.agreed_price|floatformat:"2g" }} ₽</dd></div>
+        <div>
+          <dt>Дизайнер-верстальщик{% if can_submit %} *{% endif %}</dt>
+          <dd>
+            {% if can_submit %}
+              <select class="input" name="designer" form="submit-form" required>
+                <option value="">Выберите</option>
+                {% for d in designers %}
+                  <option value="{{ d.pk }}"{% if d.pk == order.designer_id %} selected{% endif %}>{{ d.full_name }}</option>
+                {% endfor %}
+              </select>
+            {% else %}{{ order.designer.full_name|default:"—" }}{% endif %}
+          </dd>
+        </div>
+        {% if show_contacts %}
+          <div><dt>Телефон</dt><dd>{{ order.client.phone }}</dd></div>
+          <div><dt>Электронная почта</dt><dd>{{ order.client.email|default:"—" }}</dd></div>
+        {% endif %}
+        {% if order.invoice_number %}<div><dt>Номер накладной</dt><dd>{{ order.invoice_number }}</dd></div>{% endif %}
+        {% if order.cancel_reason %}<div><dt>Причина отмены</dt><dd>{{ order.cancel_reason }}</dd></div>{% endif %}
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Тиражи</h2>
+      <p class="card__sub">{{ runs|length }} тир. · {{ total_quantity|floatformat:"0g" }} шт.</p>
+      <div class="table-wrap">
+        <table class="table table--inner">
+          <thead>
+            <tr><th>Продукция / формат</th><th class="num">Количество</th><th>Материал</th><th>Исполнитель{% if can_submit %} *{% endif %}</th><th>Изготовление</th></tr>
+          </thead>
+          <tbody>
+            {% for run in runs %}
+              <tr>
+                <td>{{ run.product_type.name }} · {{ run.format }}</td>
+                <td class="num">{{ run.quantity|floatformat:"0g" }} шт.</td>
+                <td>{{ run.material.name }}</td>
+                <td>
+                  {% if can_submit %}
+                    <select class="input" name="executor_{{ run.pk }}" form="submit-form" required>
+                      <option value="">Выберите</option>
+                      {% for e in executors %}
+                        <option value="{{ e.pk }}"{% if e.pk == run.executor_id %} selected{% endif %}>{{ e.full_name }}</option>
+                      {% endfor %}
+                    </select>
+                  {% else %}{{ run.executor.full_name|default:"—" }}{% endif %}
+                </td>
+                <td>
+                  {% if run.produced_at %}{{ run.produced_at|date:"d.m.Y H:i" }}
+                  {% elif run.can_mark %}
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="produce">
+                      <input type="hidden" name="run_id" value="{{ run.pk }}">
+                      <button type="submit" class="btn btn--small">Отметить изготовление</button>
+                    </form>
+                  {% else %}—{% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr class="table__empty"><td colspan="5">Тиражей нет</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {% if order.layout_link or can_edit_layout %}
+    <section class="card">
+      <h2 class="card__title">Макет заказа</h2>
+      <p class="card__sub">Файл хранится вне ПринтУчёт: указывается ссылка или путь в локальной сети</p>
+      {% if can_edit_layout %}
+        <form method="post" class="action-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save_layout">
+          <input type="hidden" name="row_version" value="{{ order.row_version }}">
+          <div class="field">
+            <label class="field__label" for="layout_link">Путь к макету</label>
+            <input class="input" id="layout_link" name="layout_link" maxlength="500" required
+                   value="{{ posted.layout_link|default:order.layout_link|default:'' }}">
+          </div>
+          <button type="submit" class="btn btn--primary">Сохранить</button>
+        </form>
+      {% else %}
+        <p class="link-path">{{ order.layout_link }}</p>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if has_actions %}
+    <section class="card">
+      <h2 class="card__title">Действия</h2>
+      <div class="actions-col">
+        {% if can_submit %}
+          <form id="submit-form" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="submit">
+            <input type="hidden" name="row_version" value="{{ order.row_version }}">
+            <button type="submit" class="btn btn--primary">Передать на согласование</button>
+            <span class="muted">Выберите дизайнера и исполнителя каждого тиража</span>
+          </form>
+        {% endif %}
+        {% if can_approve %}
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="approve">
+            <input type="hidden" name="row_version" value="{{ order.row_version }}">
+            <button type="submit" class="btn btn--primary">Передать в производство</button>
+            <span class="muted">Нужны путь к макету и комментарий «Согласие»</span>
+          </form>
+        {% endif %}
+        {% if can_finish %}
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="ready">
+            <input type="hidden" name="row_version" value="{{ order.row_version }}">
+            <button type="submit" class="btn btn--primary">Перевести в «Готов»</button>
+            <span class="muted">У всех тиражей должна быть дата изготовления</span>
+          </form>
+        {% endif %}
+        {% if can_issue %}
+          <form method="post" class="action-form" onsubmit="return confirm('Оформить выдачу заказа {{ order.order_number }}?');">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="issue">
+            <input type="hidden" name="row_version" value="{{ order.row_version }}">
+            <div class="field">
+              <label class="field__label" for="invoice_number">Номер накладной *</label>
+              <input class="input" id="invoice_number" name="invoice_number" maxlength="30" required
+                     value="{{ posted.invoice_number|default:'' }}">
+              <p class="field__hint">Обязателен для перехода в статус «Выдан»</p>
+            </div>
+            <button type="submit" class="btn btn--primary">Оформить выдачу</button>
+          </form>
+        {% endif %}
+        {% if can_cancel %}
+          <form method="post" class="action-form" onsubmit="return confirm('Отменить заказ {{ order.order_number }}? Действие нельзя отменить.');">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="cancel">
+            <input type="hidden" name="row_version" value="{{ order.row_version }}">
+            <div class="field">
+              <label class="field__label" for="cancel_reason">Причина отмены *</label>
+              <input class="input" id="cancel_reason" name="cancel_reason" maxlength="300" required
+                     value="{{ posted.cancel_reason|default:'' }}">
+            </div>
+            <button type="submit" class="btn btn--danger">Отменить заказ</button>
+          </form>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <h2 class="card__title">Обсуждение</h2>
+      <p class="card__sub">Комментарии нельзя изменить или удалить</p>
+      {% for c in comments %}
+        <div class="comment">
+          <div class="comment__meta">
+            <span class="comment__author">{{ c.author.full_name }}</span> · {{ c.author.role.name }} · {{ c.get_kind_display }}
+            · {{ c.created_at|date:"d.m.Y H:i" }}
+          </div>
+          <div class="comment__body">{{ c.body }}</div>
+        </div>
+      {% empty %}
+        <p class="muted">Комментариев пока нет</p>
+      {% endfor %}
+
+      <form method="post" class="comment-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="comment">
+        <div class="field">
+          <label class="field__label" for="kind">Тип комментария</label>
+          <select class="input" id="kind" name="kind">
+            {% for value, label in comment_kinds %}
+              <option value="{{ value }}"{% if posted.kind == value %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label class="field__label" for="body">Комментарий</label>
+          <textarea class="input" id="body" name="body" maxlength="2000" required placeholder="Введите сообщение">{{ posted.body|default:'' }}</textarea>
+          <p class="field__hint">1–2000 символов</p>
+        </div>
+        <button type="submit" class="btn">Добавить комментарий</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">История</h2>
+      <ul class="history">
+        {% for h in history %}
+          <li>
+            <span class="history__text">{{ h.text }}</span>
+            <span class="muted">{{ h.at|date:"d.m.Y H:i" }} · {{ h.who }}</span>
+          </li>
+        {% empty %}
+          <li class="muted">Записей нет</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

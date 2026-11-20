@@ -23,13 +23,13 @@
     <thead>
       <tr>
         <th>Номер</th><th>Клиент</th><th>Продукция</th><th>Статус</th>
-        <th>Срок готовности</th><th class="num">Стоимость</th><th>Исполнитель</th>
+        <th>Срок готовности</th><th class="num">Стоимость, ₽</th><th>Исполнитель</th>
       </tr>
     </thead>
     <tbody>
       {% for order in page %}
         <tr>
-          <td class="strong">{{ order.order_number }}</td>
+          <td class="strong"><a class="link" href="{% url 'order_detail' order.pk %}">{{ order.order_number }}</a></td>
           <td>{{ order.client.name }}</td>
           <td>{{ order.products|default:"—" }}</td>
           <td><span class="badge badge--{{ order.status.code }}">{{ order.status.name }}</span></td>
@@ -37,7 +37,7 @@
             {{ order.due_date|date:"d.m.Y" }}
             {% if order.is_overdue %}<span class="badge badge--overdue">Просрочен</span>{% endif %}
           </td>
-          <td class="num">{{ order.agreed_price|floatformat:2 }}</td>
+          <td class="num">{{ order.agreed_price|floatformat:"2g" }}</td>
           <td>{{ order.executors|default:"—" }}</td>
         </tr>
       {% empty %}
