@@ -8,9 +8,9 @@
     <a href="{% url 'order_report' %}" class="{% if current == 'order_report' %}is-active{% endif %}">Отчёты</a>
   {% endif %}
   {% if role == 'admin' %}
-    <span class="is-soon" title="Страница появится на следующем шаге">Пользователи</span>
-    <span class="is-soon" title="Страница появится на следующем шаге">Резервное копирование</span>
-    <span class="is-soon" title="Страница появится на следующем шаге">Справочники</span>
-    <span class="is-soon" title="Страница появится на следующем шаге">Журнал действий</span>
+    <a href="{% url 'user_list' %}" class="{% if current == 'user_list' or current == 'user_create' or current == 'user_edit' %}is-active{% endif %}">Пользователи</a>
+    <a href="{% url 'backup_list' %}" class="{% if current == 'backup_list' %}is-active{% endif %}">Резервное копирование</a>
+    <a href="{% url 'reference_list' %}" class="{% if current == 'reference_list' or current == 'product_type_create' or current == 'product_type_edit' or current == 'material_create' or current == 'material_edit' %}is-active{% endif %}">Справочники</a>
+    <a href="{% url 'action_log_list' %}" class="{% if current == 'action_log_list' %}is-active{% endif %}">Журнал действий</a>
   {% endif %}
 {% endwith %}

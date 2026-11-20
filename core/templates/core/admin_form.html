@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+{% block title %}{{ page_title }} — ПринтУчёт{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1 class="page-title">{{ page_title }}</h1></div><a class="btn" href="{% url back_url %}">Назад</a></div>
+<form method="post" class="card" novalidate>{% csrf_token %}
+{% if form.non_field_errors %}<div class="alert alert--error">{{ form.non_field_errors }}</div>{% endif %}
+<div class="form-grid">{% for field in form %}<div class="field {% if field.name == 'is_blocked' or field.name == 'is_active' %}field--check{% endif %}"><label class="field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<p class="field__hint">{{ field.help_text }}</p>{% endif %}{% for error in field.errors %}<p class="field__error">{{ error }}</p>{% endfor %}</div>{% endfor %}</div>
+<div class="filters__actions"><button class="btn btn--primary" type="submit">Сохранить</button><a class="btn" href="{% url back_url %}">Отмена</a></div></form>
+{% endblock %}

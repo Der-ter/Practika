@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+{% block title %}Пользователи — ПринтУчёт{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1 class="page-title">Пользователи</h1><p class="muted">Создание учётных записей, назначение ролей и сброс паролей</p></div><a class="btn btn--primary" href="{% url 'user_create' %}">+ Добавить пользователя</a></div>
+<section class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Логин</th><th>ФИО</th><th>Роль</th><th>Состояние</th><th>Пароль</th><th>Действия</th></tr></thead><tbody>
+{% for item in users %}<tr><td class="strong">{{ item.login }}</td><td>{{ item.full_name }}</td><td>{{ item.role.name }}</td><td>{% if item.is_blocked %}<span class="status status--danger">Заблокирован</span>{% else %}<span class="status">Активен</span>{% endif %}</td><td>{% if item.password_changed_at %}Установлен{% else %}Требуется смена{% endif %}</td><td><a class="btn btn--small" href="{% url 'user_edit' item.pk %}">Изменить</a></td></tr>
+{% empty %}<tr class="table__empty"><td colspan="6">Пользователей пока нет</td></tr>{% endfor %}
+</tbody></table></div><p class="field__hint">Удаление учётных записей не выполняется: это сохраняет связи с заказами и журналом действий. Для прекращения доступа используйте блокировку.</p></section>
+{% endblock %}

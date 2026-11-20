@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block title %}Журнал действий — ПринтУчёт{% endblock %}
+{% block content %}
+<section class="page-heading"><div><h1>Журнал действий</h1><p>История входов и операций пользователей</p></div></section>
+<div class="panel"><form method="get" class="filters-grid">
+<label>Пользователь<select class="input" name="user"><option value="">Все</option>{% for u in users %}<option value="{{ u.pk }}" {% if filters.user == u.pk|stringformat:"s" %}selected{% endif %}>{{ u.full_name }} ({{ u.login }})</option>{% endfor %}</select></label>
+<label>Номер заказа<input class="input" name="order" value="{{ filters.order }}" placeholder="Например, 2026-000001"></label>
+<label>С даты<input class="input" type="date" name="date_from" value="{{ filters.date_from }}"></label><label>По дату<input class="input" type="date" name="date_to" value="{{ filters.date_to }}"></label>
+<div class="form-actions"><button class="button button-primary" type="submit">Применить</button><a class="button" href="{% url 'action_log_list' %}">Сбросить</a></div></form></div>
+<div class="panel"><div class="table-wrap"><table><thead><tr><th>Дата и время</th><th>Пользователь</th><th>Действие</th><th>Заказ</th><th>Прежний статус</th><th>Новый статус</th><th>Подробности</th></tr></thead><tbody>
+{% for log in logs %}<tr><td>{{ log.created_at|date:"d.m.Y H:i:s" }}</td><td>{{ log.user.full_name|default:"Система" }}</td><td>{{ log.action }}</td><td>{% if log.order %}{{ log.order.order_number }}{% else %}—{% endif %}</td><td>{{ log.old_status.name|default:"—" }}</td><td>{{ log.new_status.name|default:"—" }}</td><td>{{ log.details|default:"—" }}</td></tr>{% empty %}<tr><td colspan="7" class="empty-state">Записей не найдено.</td></tr>{% endfor %}
+</tbody></table></div><p class="muted">Показаны последние 500 записей по выбранным условиям.</p></div>
+{% endblock %}

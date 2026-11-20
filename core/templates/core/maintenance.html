@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block title %}Резервное копирование — ПринтУчёт{% endblock %}
+{% block content %}
+<section class="page-heading"><div><h1>Резервное копирование</h1><p>Создание и восстановление копий базы данных</p></div></section>
+<div class="panel">
+  <form method="post" action="{% url 'backup_create' %}">{% csrf_token %}<button class="button button-primary" type="submit">Создать резервную копию</button></form>
+  <p class="muted">Копии сохраняются в папке backups рядом с manage.py. Для работы нужны pg_dump и pg_restore из PostgreSQL.</p>
+</div>
+<div class="panel"><h2>Доступные копии</h2>
+{% if backups %}<div class="table-wrap"><table><thead><tr><th>Файл</th><th>Размер</th><th>Создана</th><th>Действие</th></tr></thead><tbody>
+{% for item in backups %}<tr><td>{{ item.name }}</td><td>{{ item.size }} байт</td><td>{{ item.modified|date:"d.m.Y H:i:s" }}</td><td><form method="post" action="{% url 'backup_restore' %}" onsubmit="return confirm('Текущая база будет заменена. Продолжить восстановление?');">{% csrf_token %}<input type="hidden" name="filename" value="{{ item.name }}"><input type="hidden" name="confirm" value="yes"><button class="button button-danger" type="submit">Восстановить</button></form></td></tr>{% endfor %}
+</tbody></table></div>{% else %}<p class="empty-state">Резервных копий пока нет.</p>{% endif %}</div>
+{% endblock %}

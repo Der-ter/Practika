@@ -213,3 +213,53 @@ class OrderAndClientEditTests(TestCase):
         self.client.force_login(self.executor)
         response = self.client.get(reverse("client_list"))
         self.assertEqual(response.status_code, 403)
+
+
+class AdminToolsTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin_role = Role.objects.get(code=RoleCode.ADMIN)
+        cls.manager_role = Role.objects.get(code=RoleCode.MANAGER)
+        cls.executor_role = Role.objects.get(code=RoleCode.EXECUTOR)
+        cls.admin = AppUser.objects.create_user(
+            login="admin_tools_test", password="StrongPass123",
+            full_name="Администратор инструментов", role=cls.admin_role,
+        )
+        cls.manager = AppUser.objects.create_user(
+            login="manager_tools_test", password="StrongPass123",
+            full_name="Менеджер инструментов", role=cls.manager_role,
+        )
+
+    def test_admin_can_open_user_and_reference_lists(self):
+        self.client.force_login(self.admin)
+        self.assertEqual(self.client.get(reverse("user_list")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("reference_list")).status_code, 200)
+
+    def test_non_admin_cannot_open_admin_pages(self):
+        self.client.force_login(self.manager)
+        self.assertEqual(self.client.get(reverse("user_list")).status_code, 403)
+        self.assertEqual(self.client.get(reverse("reference_list")).status_code, 403)
+
+    def test_admin_can_create_user_with_forced_password_change(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("user_create"), {
+            "login": "new_executor", "full_name": "Новый исполнитель",
+            "role": self.executor_role.pk, "is_blocked": "",
+            "temporary_password": "TempPass123",
+        })
+        self.assertEqual(response.status_code, 302)
+        created = AppUser.objects.get(login="new_executor")
+        self.assertTrue(created.check_password("TempPass123"))
+        self.assertIsNone(created.password_changed_at)
+
+    def test_admin_can_reset_password(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("user_edit", args=[self.manager.pk]), {
+            "login": self.manager.login, "full_name": self.manager.full_name,
+            "role": self.manager_role.pk, "is_blocked": "",
+            "temporary_password": "ResetPass123",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.manager.refresh_from_db()
+        self.assertTrue(self.manager.check_password("ResetPass123"))
+        self.assertIsNone(self.manager.password_changed_at)

@@ -269,3 +269,13 @@ textarea.input { height: auto; min-height: 96px; padding: 10px 12px; resize: ver
 
 /* Step 6: отчёты */
 .stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}.stat-card{background:#fff;border:1px solid #dce3ea;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}.stat-card span{color:#64748b;font-size:14px}.stat-card strong{font-size:24px;color:#17324d}.report-chart{display:grid;gap:12px;background:#fff;border:1px solid #dce3ea;border-radius:10px;padding:18px;margin:12px 0 24px}.report-chart__row{display:grid;grid-template-columns:minmax(130px,220px) 1fr 40px;gap:12px;align-items:center}.report-chart__track{height:14px;background:#edf1f5;border-radius:10px;overflow:hidden}.report-chart__bar{height:100%;background:#3976ad;border-radius:10px}@media(max-width:600px){.stats-grid{grid-template-columns:1fr}.report-chart__row{grid-template-columns:1fr 2fr 32px}}
+
+/* Шаг 7: административные страницы */
+.admin-columns { display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; align-items: start; }
+.section-title { margin: 0; font-size: 18px; }
+.status { display: inline-block; padding: 3px 8px; border-radius: 5px; background: #e8f5ec; color: #216e39; font-size: 12px; font-weight: 600; }
+.status--danger { background: var(--danger-bg); color: var(--danger); }
+.field--check { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.field--check .field__label { margin: 0; }
+.field--check .input { width: auto; }
+@media (max-width: 900px) { .admin-columns { grid-template-columns: 1fr; } }
