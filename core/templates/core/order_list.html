@@ -13,7 +13,7 @@
   <div class="filters__actions">
     <button type="submit" class="btn btn--primary">Найти</button>
     {% if can_create %}
-      <a href="#" class="btn btn--primary" title="Форма появится на следующем шаге">+ Новый заказ</a>
+      <a href="{% url 'order_create' %}" class="btn btn--primary">+ Новый заказ</a>
     {% endif %}
   </div>
 </form>

@@ -242,3 +242,26 @@ textarea.input { height: auto; min-height: 96px; padding: 10px 12px; resize: ver
   .layout { grid-template-columns: 1fr; }
   .facts { grid-template-columns: 1fr; }
 }
+
+/* Формы создания клиента и заказа */
+.form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
+.form-grid--runs { grid-template-columns: minmax(180px, 1.2fr) minmax(130px, 1fr) minmax(120px, .8fr) minmax(180px, 1.2fr) 64px; align-items: end; gap: 14px; }
+.runs-card { margin-top: 2px; }
+.runs-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.runs-card__head .card__sub { margin-top: 4px; }
+.run-form { border-top: 1px solid var(--line); padding: 16px 0 8px; }
+.run-form:first-child { border-top: 0; padding-top: 8px; }
+.run-form .field { min-width: 0; margin-bottom: 8px; }
+.run-form .input { min-width: 0; }
+.field__error { color: var(--danger); font-size: 12px; margin: 5px 0 0; }
+.field--delete { min-width: 64px; }
+.field--delete input { width: 16px; height: 16px; margin: 9px 0 0 2px; accent-color: var(--blue); }
+@media (max-width: 980px) {
+  .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid--runs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .form-grid, .form-grid--runs { grid-template-columns: 1fr; }
+  .runs-card__head { align-items: stretch; flex-direction: column; }
+  .runs-card__head .btn { align-self: flex-start; }
+}

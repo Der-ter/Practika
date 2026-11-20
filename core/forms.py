@@ -81,3 +81,61 @@ class OrderFilterForm(StyledForm):
         widget=forms.DateInput(attrs={"type": "date"}),
     )
     executor = forms.CharField(label="Исполнитель", required=False, max_length=150)
+
+
+# ---------------------------------------------------------------------------
+# Создание клиента и заказа (ФТ-06—ФТ-08)
+from django.forms import inlineformset_factory
+from core.models import Client, Order, PrintRun, ProductType, Material
+
+
+class ClientForm(StyledForm):
+    client_type = forms.ChoiceField(label="Тип клиента", choices=Client.ClientType.choices)
+    name = forms.CharField(label="Наименование / ФИО", max_length=200)
+    contact_person = forms.CharField(label="Контактное лицо", max_length=150, required=False)
+    phone = forms.RegexField(
+        label="Телефон", regex=r"^[0-9+\-() ]+$", max_length=30,
+        error_messages={"invalid": "Допустимы цифры и знаки + - ( ) и пробел."},
+    )
+    email = forms.EmailField(label="Email", max_length=100, required=False)
+
+
+class OrderCreateForm(StyledForm):
+    client = forms.ModelChoiceField(label="Клиент", queryset=Client.objects.none(), empty_label="Выберите клиента")
+    due_date = forms.DateField(
+        label="Срок готовности *",
+        widget=forms.DateInput(attrs={"type": "date"}),
+    )
+    agreed_price = forms.DecimalField(
+        label="Согласованная стоимость, ₽ *", max_digits=10, decimal_places=2,
+        min_value=0,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["client"].queryset = Client.objects.all()
+
+
+class PrintRunForm(forms.ModelForm):
+    class Meta:
+        model = PrintRun
+        fields = ("product_type", "format", "quantity", "material")
+        widgets = {
+            "format": forms.TextInput(attrs={"placeholder": "Например, A4"}),
+            "quantity": forms.NumberInput(attrs={"min": 1, "max": 1000000}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["product_type"].queryset = ProductType.objects.all()
+        self.fields["product_type"].empty_label = "Выберите продукцию"
+        self.fields["material"].queryset = Material.objects.filter(is_active=True)
+        self.fields["material"].empty_label = "Выберите материал"
+        for field in self.fields.values():
+            field.widget.attrs.setdefault("class", "input")
+
+
+PrintRunFormSet = inlineformset_factory(
+    Order, PrintRun, form=PrintRunForm, extra=1, can_delete=True, min_num=1,
+    validate_min=True, max_num=50, validate_max=True,
+)

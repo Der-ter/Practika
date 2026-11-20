@@ -1,0 +1,105 @@
+{% extends "core/base.html" %}
+{% block title %}Новый заказ — ПринтУчёт{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 class="page-title">Новый заказ</h1><p class="muted">Заполните основные сведения и добавьте один или несколько тиражей</p></div>
+  <a href="{% url 'orders' %}" class="btn">К списку</a>
+</div>
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert--error">{{ form.non_field_errors }}</div>{% endif %}
+  <section class="card">
+    <h2 class="card__title">Основные данные</h2>
+    <div class="form-grid">
+      {% for field in form %}
+        <div class="field">
+          <label class="field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <p class="field__hint">Не нашли клиента? <a class="link" href="{% url 'client_create' %}">Создать нового клиента</a></p>
+  </section>
+
+  <section class="card runs-card">
+    <div class="runs-card__head">
+      <div>
+        <h2 class="card__title">Тиражи</h2>
+        <p class="card__sub">Добавьте один или несколько тиражей. Исполнители назначаются при передаче заказа на согласование макета.</p>
+      </div>
+      <button type="button" class="btn" id="add-run">+ Добавить тираж</button>
+    </div>
+    {{ run_formset.management_form }}
+    {% if run_formset.non_form_errors %}<div class="alert alert--error">{{ run_formset.non_form_errors }}</div>{% endif %}
+    <div id="run-forms">
+      {% for run_form in run_formset %}
+        <div class="run-form">
+          {% for hidden in run_form.hidden_fields %}{{ hidden }}{% endfor %}
+          <div class="form-grid form-grid--runs">
+            {% for field in run_form.visible_fields %}
+              {% if field.name != "DELETE" %}
+                <div class="field">
+                  <label class="field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% for error in field.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+                </div>
+              {% endif %}
+            {% endfor %}
+            {% if run_formset.can_delete %}
+              <div class="field field--delete">
+                <label class="field__label" for="{{ run_form.DELETE.id_for_label }}">Удалить</label>
+                {{ run_form.DELETE }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <template id="empty-run-form">
+      <div class="run-form">
+        {% for hidden in run_formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="form-grid form-grid--runs">
+          {% for field in run_formset.empty_form.visible_fields %}
+            {% if field.name != "DELETE" %}
+              <div class="field">
+                <label class="field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+              </div>
+            {% endif %}
+          {% endfor %}
+          {% if run_formset.can_delete %}
+            <div class="field field--delete">
+              <label class="field__label" for="{{ run_formset.empty_form.DELETE.id_for_label }}">Удалить</label>
+              {{ run_formset.empty_form.DELETE }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </template>
+  </section>
+  <div class="filters__actions">
+    <button type="submit" class="btn btn--primary">Создать заказ</button>
+    <a href="{% url 'orders' %}" class="btn">Отмена</a>
+  </div>
+</form>
+<script>
+(() => {
+  const addButton = document.getElementById("add-run");
+  const container = document.getElementById("run-forms");
+  const template = document.getElementById("empty-run-form");
+  const totalForms = document.getElementById("id_print_runs-TOTAL_FORMS")
+    || document.querySelector('input[name$="-TOTAL_FORMS"]');
+  if (!addButton || !container || !template || !totalForms) return;
+
+  addButton.addEventListener("click", () => {
+    const index = Number(totalForms.value);
+    const html = template.innerHTML.replaceAll("__prefix__", String(index));
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = html.trim();
+    container.appendChild(wrapper.firstElementChild);
+    totalForms.value = String(index + 1);
+  });
+})();
+</script>
+{% endblock %}
