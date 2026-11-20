@@ -2,8 +2,10 @@
 {% with role=user.role.code current=request.resolver_match.url_name %}
   <a href="{% url 'orders' %}" class="{% if current == 'orders' %}is-active{% endif %}">Заказы</a>
   {% if role == 'manager' or role == 'admin' %}
-    <span class="is-soon" title="Страница появится на следующем шаге">Клиенты</span>
-    <span class="is-soon" title="Страница появится на следующем шаге">Отчёты</span>
+    <a href="{% url 'client_list' %}" class="{% if current == 'client_list' or current == 'client_create' or current == 'client_edit' %}is-active{% endif %}">Клиенты</a>
+  {% endif %}
+  {% if role == 'manager' or role == 'admin' %}
+    <a href="{% url 'order_report' %}" class="{% if current == 'order_report' %}is-active{% endif %}">Отчёты</a>
   {% endif %}
   {% if role == 'admin' %}
     <span class="is-soon" title="Страница появится на следующем шаге">Пользователи</span>

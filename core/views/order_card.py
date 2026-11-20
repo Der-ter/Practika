@@ -47,6 +47,8 @@ def _dispatch(request, order, action):
 def _history_text(entry):
     if entry.action == "order_create":
         return "Заказ создан"
+    if entry.action == "order_edit":
+        return entry.details or "Данные заказа изменены"
     if entry.action == "status_change":
         return f"Статус: {entry.old_status} → {entry.new_status}"
     if entry.action == "layout_link":
@@ -65,6 +67,7 @@ def _context(request, order, posted):
     owner_manager = role == RoleCode.MANAGER and order.manager_id == user.id
     owner_designer = role == RoleCode.DESIGNER and order.designer_id == user.id
     can_submit = owner_manager and status == "new"
+    can_edit_order = owner_manager and status in ("new", "layout_approval")
     is_my_executor = role == RoleCode.EXECUTOR and any(r.executor_id == user.id for r in runs)
 
     for run in runs:
@@ -95,6 +98,7 @@ def _context(request, order, posted):
         "posted": posted,
         # права для интерфейса; настоящая проверка — в services.transitions
         "can_submit": can_submit,
+        "can_edit_order": can_edit_order,
         "can_cancel": owner_manager and status in ("new", "layout_approval"),
         "can_issue": owner_manager and status == "ready",
         "can_edit_layout": owner_designer and status == "layout_approval",

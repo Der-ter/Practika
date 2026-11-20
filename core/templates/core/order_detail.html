@@ -6,7 +6,12 @@
     <h1 class="page-title">Заказ {{ order.order_number }}</h1>
     <p class="muted">Создан {{ order.created_at|date:"d.m.Y" }} · Автор: {{ order.manager.full_name }}</p>
   </div>
-  <a href="{% url 'orders' %}" class="btn">К списку</a>
+  <div class="page-head__actions">
+    {% if can_edit_order %}
+      <a href="{% url 'order_edit' order.pk %}" class="btn btn--primary">Изменить заказ</a>
+    {% endif %}
+    <a href="{% url 'orders' %}" class="btn">К списку</a>
+  </div>
 </div>
 <p class="status-line">
   Статус: <span class="badge badge--{{ order.status.code }}">{{ order.status.name }}</span>

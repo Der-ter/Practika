@@ -24,6 +24,7 @@
       <tr>
         <th>Номер</th><th>Клиент</th><th>Продукция</th><th>Статус</th>
         <th>Срок готовности</th><th class="num">Стоимость, ₽</th><th>Исполнитель</th>
+        {% if can_edit_orders %}<th>Действия</th>{% endif %}
       </tr>
     </thead>
     <tbody>
@@ -39,9 +40,16 @@
           </td>
           <td class="num">{{ order.agreed_price|floatformat:"2g" }}</td>
           <td>{{ order.executors|default:"—" }}</td>
+          {% if can_edit_orders %}
+            <td>
+              {% if order.can_edit %}
+                <a class="btn btn--small" href="{% url 'order_edit' order.pk %}">Изменить</a>
+              {% else %}—{% endif %}
+            </td>
+          {% endif %}
         </tr>
       {% empty %}
-        <tr class="table__empty"><td colspan="7">Нет заказов</td></tr>
+        <tr class="table__empty"><td colspan="{% if can_edit_orders %}8{% else %}7{% endif %}">Нет заказов</td></tr>
       {% endfor %}
     </tbody>
   </table>

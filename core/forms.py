@@ -100,6 +100,34 @@ class ClientForm(StyledForm):
     email = forms.EmailField(label="Email", max_length=100, required=False)
 
 
+class OrderEditForm(StyledForm):
+    """Редактирование срока готовности и согласованной стоимости заказа (ФТ-08)."""
+
+    due_date = forms.DateField(
+        label="Срок готовности *",
+        widget=forms.DateInput(attrs={"type": "date"}),
+    )
+    agreed_price = forms.DecimalField(
+        label="Согласованная стоимость, ₽ *", max_digits=10, decimal_places=2,
+        min_value=0,
+    )
+
+    def __init__(self, *args, order, **kwargs):
+        self.order = order
+        super().__init__(*args, **kwargs)
+
+    def clean_due_date(self):
+        from django.utils import timezone
+
+        value = self.cleaned_data["due_date"]
+        created_date = timezone.localtime(self.order.created_at).date()
+        if value < created_date:
+            raise forms.ValidationError(
+                "Срок готовности не может быть раньше даты создания заказа."
+            )
+        return value
+
+
 class OrderCreateForm(StyledForm):
     client = forms.ModelChoiceField(label="Клиент", queryset=Client.objects.none(), empty_label="Выберите клиента")
     due_date = forms.DateField(
